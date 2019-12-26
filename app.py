@@ -12,7 +12,8 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 # enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
+CORS(app, resources={r'/api/*': {'origins': '*'}})
+# CORS(app)
 
 BOOKS = [
     {
@@ -76,6 +77,19 @@ def all_books():
 
         response_object = cfg
         # print(cfg)
+    return jsonify(response_object)
+
+
+@app.route('/api/findsetups', methods=['GET', 'POST'])
+def find_setups():
+    response_object = {'s': 'un'}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        response_object = post_data
+        response_object['status'] = 'success'
+    else:
+        response_object['status'] = 'get'
+
     return jsonify(response_object)
 
 
