@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
+import os
+import re
 import vix
 import sys
 
@@ -42,6 +44,30 @@ root_report = r'\\rum-cherezov-dt\!Reports'
 host = vix.VixHost(service_provider=3)
 
 
+def find_builds(build, tag, _prod):
+    #TODO: remove absolute path
+    with open(r'C:\exp_vue_bootstrap\server\cfg.json') as fi:
+        cfg_dct = json.load(fi)
+
+    patt = re.compile(r'-%s(_x64)*__(git--)*%s$' % (build, tag), re.I)
+
+    full_prod = cfg_dct['prod_dirs']
+    print(full_prod)
+    work_prod = list()
+    for i in _prod:
+        for j in full_prod:
+            if j.startswith(i):
+                work_prod.append(j)
+    search_dirs = [os.path.join(cfg_dct['root_dir'], item) for item in work_prod]
+    setups = list()
+
+    for _dir in search_dirs:
+        obj = os.scandir(_dir)
+        for item in obj:
+            if re.search(patt, item.name):
+                setups.append(item.path)
+    return setups
+
 # sanity check route
 @app.route('/ping', methods=['GET'])
 def ping_pong():
@@ -82,13 +108,15 @@ def all_books():
 
 @app.route('/api/findsetups', methods=['GET', 'POST'])
 def find_setups():
-    response_object = {'s': 'un'}
+    response_object = []
     if request.method == 'POST':
         post_data = request.get_json()
-        response_object = post_data
-        response_object['status'] = 'success'
+        # response_object = post_data
+        # response_object['status'] = 'success'
+        print(post_data)
+        response_object = find_builds(post_data['build'], post_data['tag'], post_data['products'])
     else:
-        response_object['status'] = 'get'
+        response_object = ['get']
 
     return jsonify(response_object)
 
