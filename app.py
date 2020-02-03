@@ -44,7 +44,7 @@ root_report = r'\\rum-cherezov-dt\!Reports'
 host = vix.VixHost(service_provider=3)
 
 
-def find_builds(build, tag, _prod):
+def find_builds(build, tag, _prod, subdir):
     #TODO: remove absolute path
     with open(r'C:\exp_vue_bootstrap\server\cfg.json') as fi:
         cfg_dct = json.load(fi)
@@ -58,14 +58,18 @@ def find_builds(build, tag, _prod):
         for j in full_prod:
             if j.startswith(i):
                 work_prod.append(j)
-    search_dirs = [os.path.join(cfg_dct['root_dir'], item) for item in work_prod]
+
+    r_dir = cfg_dct['root_dir']
+
+    search_dirs = [os.path.join(r_dir, item, subdir) for item in work_prod]
     setups = list()
 
     for _dir in search_dirs:
-        obj = os.scandir(_dir)
-        for item in obj:
-            if re.search(patt, item.name):
-                setups.append(item.path)
+        if os.path.exists(_dir):
+            obj = os.scandir(_dir)
+            for item in obj:
+                if re.search(patt, item.name):
+                    setups.append(item.path)
     return setups
 
 # sanity check route
@@ -114,7 +118,7 @@ def find_setups():
         # response_object = post_data
         # response_object['status'] = 'success'
         print(post_data)
-        response_object = find_builds(post_data['build'], post_data['tag'], post_data['products'])
+        response_object = find_builds(post_data['build'], post_data['tag'], post_data['products'], post_data['subdir'])
     else:
         response_object = ['get']
 
