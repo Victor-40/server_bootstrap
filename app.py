@@ -23,13 +23,16 @@ root_nv = r'\\svr-rum-net-04\new_versions'
 root_host_test = r'D:\Testing\Test-1'
 root_guest_test = r'c:\Test'
 root_report = r'\\rum-cherezov-dt\!Reports'
+cfg_path = r'c:\production_svelte\server\cfg.json'
+snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
+
 
 host = vix.VixHost(service_provider=3)
 
 
 def find_builds(build, tag, _prod, subdir):
     #TODO: remove absolute path
-    with open(r'C:\exp_vue_bootstrap\server\cfg.json') as fi:
+    with open(r'c:\production_svelte\server\cfg.json') as fi:
         cfg_dct = json.load(fi)
 
     patt = re.compile(r'-%s(_x64)*__(git--)*%s$' % (build, tag), re.I)
@@ -58,10 +61,10 @@ def find_builds(build, tag, _prod, subdir):
 
 def make_xls(setups):
     result = list()
-    with open(r'c:\exp_vue_bootstrap\server\cfg.json') as fi:
+    with open(cfg_path) as fi:
         cfg_dct = json.load(fi)
 
-    with open(r'c:\exp_vue_bootstrap\server\snap_dct.json') as fi:
+    with open(snap_cfg_path) as fi:
         vms = json.load(fi)
 
     for _setup in setups:
@@ -74,7 +77,8 @@ def make_xls(setups):
                 if k.startswith(snapshot_prefix):
                     result.append((_setup,  vm_name, vm_path,  k, "0"))
 
-    job_file = r'd:\Testing\VMWare\VM-Monitor-test.Jobs.xls'
+    job_file = r'd:\Testing\VMWare\VM-Monitor.Jobs.xls'
+    # job_file = r'c:\production_svelte\sapper\VM-Monitor-test.Jobs.xls'
     pythoncom.CoInitialize()
     xls = client.Dispatch("Excel.Application")
 
@@ -107,7 +111,7 @@ def ping_pong():
 @app.route('/api/cfg', methods=['GET'])
 def all_books():
 
-    with open(r'c:\exp_work\flask_rest\snap_dct.json') as fi:
+    with open(snap_cfg_path) as fi:
         cfg = json.load(fi)
 
     for _vm in cfg:
@@ -132,12 +136,20 @@ def find_setups():
     response_object = []
     if request.method == 'POST':
         post_data = request.get_json()
-        # response_object = post_data
-        # response_object['status'] = 'success'
-        print(post_data)
+        # print(post_data)
         response_object = find_builds(post_data['build'], post_data['tag'], post_data['products'], post_data['subdir'])
     else:
         response_object = ['get']
+
+    return jsonify(response_object)
+
+
+@app.route('/api/makexls', methods=['POST'])
+def makexls():
+    response_object = []
+    post_data = request.get_json()
+    response_object = make_xls(post_data)
+    # print("make_xls", response_object)
 
     return jsonify(response_object)
 
