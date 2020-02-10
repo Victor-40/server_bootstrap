@@ -15,15 +15,15 @@
       "sn": ["Office 2013", "ProE 5.0", "Creo 3.0", "Catia R19", "Catia R21", "Catia R22", "Catia R27", "NX 9.0", "Solid Edge ST10", "SW 2020 SP1.0",  "Catia R28"]},
   "Windows 7 x64 French.vmx": {
       "pth": "d:\\Images\\Windows 7 x64 French\\Windows 7 x64 French.vmx",
-      "sn": ["Office 2010", "Creo 3.0", "Catia R20", "Catia R22", "Catia R24", "Catia R25", "Catia R27", "NX 9.0", "NX 11.0", "Solid Edge 2019", "Solid Edge ST10", "SW 2019 SP3.0",  "Catia R28"]},
+      "sn": ["Office 2010", "Creo 3.0", "Catia R20", "Catia R22", "Catia R24", "Catia R25", "Catia R27", "NX 9.0", "NX 11.0", "Solid Edge 2019", "Solid Edge ST10", "SW 2020 SP1.0",  "Catia R28"]},
   "Windows 7 x64 Italian.vmx": {
       "pth": "d:\\Images\\Windows 7 x64 Italian\\Windows 7 x64 Italian.vmx",
-      "sn": ["Office 2007", "Creo 3.0", "Catia R19", "Catia R23", "Catia R25", "Catia R27", "NX 9.0", "NX 10.0", "Solid Edge 2019", "Solid Edge ST10", "SW 2019 SP3.0" ]},
+      "sn": ["Office 2007", "Creo 3.0", "Catia R19", "Catia R23", "Catia R25", "Catia R27", "NX 9.0", "NX 10.0", "Solid Edge 2019", "Solid Edge ST10", "SW 2020 SP1.0" ]},
   "Windows 7 x64 Jap new.vmx": {
       "pth": "d:\\Images\\Windows 7 x64 Jap new\\Windows 7 x64 Jap new.vmx",
-      "sn": ["NX 8.5", "NX 9.0", "NX 11.0", "NX 12.0", "Solid Edge 2019", "Solid Edge ST10", "SW 2019 SP3.0",  "Creo 2.0", "Creo 3.0", "Catia R19", "Catia R22", "Catia R24", "Catia R25", "Catia R28", "Office 2010"]},
+      "sn": ["NX 8.5", "NX 9.0", "NX 11.0", "NX 12.0", "Solid Edge 2019", "Solid Edge ST10", "SW 2020 SP1.0",  "Creo 2.0", "Creo 3.0", "Catia R19", "Catia R22", "Catia R24", "Catia R25", "Catia R28", "Office 2010"]},
   "Windows 7 x64 Rus.vmx": {
-      "pth": "d:\\Images\\Windows 7 x64 Rus\\Windows 7 x64 Rus.vmx",
+      "pth": "E:\\Images\\Windows 7 x64 Rus\\Windows 7 x64 Rus.vmx",
       "sn": ["Office 2010", "Creo 2.0", "Creo 3.0", "Catia R21", "Catia R22", "Catia R24", "Catia R27", "NX 11.0", "NX 12.0", "Solid Edge 2019", "Solid Edge ST10", "SW 2020 SP1.0",  "Catia R28"]},
   "Windows 8 x64.vmx": {
       "pth": "d:\\Images\\Windows 8 x64\\Windows 8 x64.vmx",
