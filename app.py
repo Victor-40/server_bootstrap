@@ -32,23 +32,23 @@ host = vix.VixHost(service_provider=3)
 
 
 def find_builds(build, tag, _prod, subdir):
-    #TODO: remove absolute path
-    with open(r'c:\production_svelte\server\cfg.json') as fi:
-        cfg_dct = json.load(fi)
 
     patt = re.compile(r'-%s(_x64)*__(git--)*%s$' % (build, tag), re.I)
 
-    full_prod = cfg_dct['prod_dirs']
-    print(full_prod)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    res = cursor.execute("SELECT prod_root FROM prod_dirs")
+    full_prod = res.fetchall()
+    conn.close()
+
+    # print(full_prod)
     work_prod = list()
     for i in _prod:
         for j in full_prod:
-            if j.startswith(i):
-                work_prod.append(j)
+            if j[0].startswith(i):
+                work_prod.append(j[0])
 
-    r_dir = cfg_dct['root_dir']
-
-    search_dirs = [os.path.join(r_dir, item, subdir) for item in work_prod]
+    search_dirs = [os.path.join(root_nv, item, subdir) for item in work_prod]
     setups = list()
 
     for _dir in search_dirs:
