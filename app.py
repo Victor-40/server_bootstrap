@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 import os
 import re
+import sqlite3
 import vix
 import sys
 from win32com import client
@@ -25,7 +26,7 @@ root_guest_test = r'c:\Test'
 root_report = r'\\rum-cherezov-dt\!Reports'
 cfg_path = r'c:\production_svelte\server\cfg.json'
 snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
-
+db_path = r'c:\production_svelte\server\db.sqlite3'
 
 host = vix.VixHost(service_provider=3)
 
@@ -110,9 +111,17 @@ def ping_pong():
 
 @app.route('/api/cfg', methods=['GET'])
 def all_books():
+    cfg = dict()
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    res = cursor.execute("SELECT vm_name, vm_path FROM fenix_maindb GROUP BY vm_name")
+    db_req = res.fetchall()
+    conn.close()
+    for item in db_req:
+        cfg[item[0]] = {'pth': item[1]}
 
-    with open(snap_cfg_path) as fi:
-        cfg = json.load(fi)
+    # with open(snap_cfg_path) as fi:
+    #     cfg = json.load(fi)
 
     for _vm in cfg:
         try:

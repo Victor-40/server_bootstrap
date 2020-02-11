@@ -13,7 +13,8 @@ row = ("Windows 7 x64 Rus", r"d:\Images\Windows 7 x64 Rus\Windows 7 x64 Rus.vmx"
 # conn.commit()
 
 # cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix FROM fenix_maindb WHERE production =='1'")
-cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix FROM fenix_maindb WHERE vm_name =='Windows 8 x64 German'")
+# cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix FROM fenix_maindb WHERE vm_name =='Windows 8 x64 German'")
+cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix FROM fenix_maindb GROUP BY vm_name")
 
 # cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix FROM fenix_maindb")
 
