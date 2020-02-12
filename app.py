@@ -29,15 +29,22 @@ snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
 db_path = r'c:\production_svelte\server\db.sqlite3'
 
 ###########
-cfg_dct = dict()
+# cfg_dct = dict()
+# all_snapshots = list()
+
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
-res = cursor.execute("SELECT prod, snap FROM prod_snap")
-db_req = res.fetchall()
-conn.close()
-for prod, snap in db_req:
-    cfg_dct[prod] = snap
 
+# res = cursor.execute("SELECT prod, snap FROM prod_snap")
+# db_req = res.fetchall()
+
+# for prod, snap in db_req:
+#     cfg_dct[prod] = snap
+
+res = cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix  FROM fenix_maindb WHERE production='1'")
+all_snapshots = res.fetchall()
+
+conn.close()
 ############
 
 host = vix.VixHost(service_provider=3)
@@ -75,8 +82,6 @@ def find_builds(build, tag, _prod, subdir):
 
 def make_xls(setups):
     result = list()
-    # with open(cfg_path) as fi:
-    #     cfg_dct = json.load(fi)
 
     with open(snap_cfg_path) as fi:
         vms = json.load(fi)
@@ -84,16 +89,15 @@ def make_xls(setups):
     for _setup in setups:
         setup_prefix = os.path.basename(_setup).split('-')[0]
 
-        snapshot_prefix = cfg_dct[setup_prefix]
-        for _vm in vms:
-            vm_name = _vm.replace('.vmx', '')
-            vm_path = vms[_vm]['pth']
-            for k in vms[_vm]['sn']:
-                if k.startswith(snapshot_prefix):
-                    result.append((_setup,  vm_name, vm_path,  k, "0"))
+        # snapshot_prefix = cfg_dct[setup_prefix]
+
+        for item in all_snapshots:
+            print(item)
+            vm_name, vm_path, vm_snap, prod_prefix = item
+            if prod_prefix.startswith(setup_prefix):
+                result.append((_setup,  vm_name, vm_path,  vm_snap, "0"))
 
     job_file = r'd:\Testing\VMWare\VM-Monitor.Jobs.xls'
-    # job_file = r'c:\production_svelte\sapper\VM-Monitor-test.Jobs.xls'
     pythoncom.CoInitialize()
     xls = client.Dispatch("Excel.Application")
 
