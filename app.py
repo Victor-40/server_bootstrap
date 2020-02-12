@@ -27,25 +27,32 @@ root_report = r'\\rum-cherezov-dt\!Reports'
 cfg_path = r'c:\production_svelte\server\cfg.json'
 snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
 db_path = r'c:\production_svelte\server\db.sqlite3'
+snapshot_dct = dict()
 
-###########
-# cfg_dct = dict()
-# all_snapshots = list()
-
+# ---- DB ----
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
-
-# res = cursor.execute("SELECT prod, snap FROM prod_snap")
-# db_req = res.fetchall()
-
-# for prod, snap in db_req:
-#     cfg_dct[prod] = snap
 
 res = cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix  FROM fenix_maindb WHERE production='1'")
 all_snapshots = res.fetchall()
 
+full_prod = cursor.execute("SELECT prod_root FROM prod_dirs").fetchall()
+
+snapshot_row = cursor.execute("SELECT vm_name, vm_snap FROM fenix_maindb").fetchall()
+
 conn.close()
-############
+# ---- end DB ----
+
+for item in snapshot_row:
+    vm, snap = item
+    if vm in snapshot_dct:
+        snapshot_dct[vm].append(snap)
+    else:
+        snapshot_dct[vm] = [snap]
+
+for key in snapshot_dct:
+    snapshot_dct[key] = sorted(snapshot_dct[key])
+
 
 host = vix.VixHost(service_provider=3)
 
@@ -54,13 +61,6 @@ def find_builds(build, tag, _prod, subdir):
 
     patt = re.compile(r'-%s(_x64)*__(git--)*%s$' % (build, tag), re.I)
 
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    res = cursor.execute("SELECT prod_root FROM prod_dirs")
-    full_prod = res.fetchall()
-    conn.close()
-
-    # print(full_prod)
     work_prod = list()
     for i in _prod:
         for j in full_prod:
@@ -83,16 +83,13 @@ def find_builds(build, tag, _prod, subdir):
 def make_xls(setups):
     result = list()
 
-    with open(snap_cfg_path) as fi:
-        vms = json.load(fi)
+    # with open(snap_cfg_path) as fi:
+    #     vms = json.load(fi)
 
     for _setup in setups:
         setup_prefix = os.path.basename(_setup).split('-')[0]
 
-        # snapshot_prefix = cfg_dct[setup_prefix]
-
         for item in all_snapshots:
-            print(item)
             vm_name, vm_path, vm_snap, prod_prefix = item
             if prod_prefix.startswith(setup_prefix):
                 result.append((_setup,  vm_name, vm_path,  vm_snap, "0"))
@@ -135,11 +132,8 @@ def all_books():
     res = cursor.execute("SELECT vm_name, vm_path FROM fenix_maindb GROUP BY vm_name")
     db_req = res.fetchall()
     conn.close()
-    for item in db_req:
-        cfg[item[0]] = {'pth': item[1]}
-
-    # with open(snap_cfg_path) as fi:
-    #     cfg = json.load(fi)
+    for vmname, vmpath in db_req:
+        cfg[vmname] = {'pth': vmpath}
 
     for _vm in cfg:
         try:
@@ -160,7 +154,7 @@ def all_books():
 
 @app.route('/api/findsetups', methods=['GET', 'POST'])
 def find_setups():
-    response_object = []
+    # response_object = []
     if request.method == 'POST':
         post_data = request.get_json()
         # print(post_data)
@@ -173,12 +167,17 @@ def find_setups():
 
 @app.route('/api/makexls', methods=['POST'])
 def makexls():
-    response_object = []
+    # response_object = []
     post_data = request.get_json()
     response_object = make_xls(post_data)
-    # print("make_xls", response_object)
 
     return jsonify(response_object)
+
+
+@app.route('/api/startclear', methods=['GET'])
+def start_clear():
+    # print(snapshot_dct)
+    return jsonify(snapshot_dct)
 
 
 if __name__ == '__main__':
