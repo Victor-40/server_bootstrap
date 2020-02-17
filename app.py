@@ -5,6 +5,7 @@ import os
 import re
 import sqlite3
 import vix
+import subprocess
 import sys
 from win32com import client
 import pythoncom
@@ -95,6 +96,8 @@ def make_xls(setups):
                 result.append((_setup,  vm_name, vm_path,  vm_snap, "0"))
 
     job_file = r'd:\Testing\VMWare\VM-Monitor.Jobs.xls'
+    if os.path.exists(job_file):
+        os.remove(job_file)
     pythoncom.CoInitialize()
     xls = client.Dispatch("Excel.Application")
 
@@ -178,6 +181,12 @@ def makexls():
 def start_clear():
     # print(snapshot_dct)
     return jsonify(snapshot_dct)
+
+
+@app.route('/api/start_testset', methods=['GET'])
+def start_testset():
+    subprocess.call([r'd:\Testing\VMWare\start_auto.bat'])
+    return jsonify('OK! Testset started')
 
 
 if __name__ == '__main__':
