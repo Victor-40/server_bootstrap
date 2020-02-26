@@ -29,6 +29,7 @@ cfg_path = r'c:\production_svelte\server\cfg.json'
 snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
 db_path = r'c:\production_svelte\server\db.sqlite3'
 snapshot_dct = dict()
+all_cfg_dct = dict()
 
 # ---- DB ----
 conn = sqlite3.connect(db_path)
@@ -40,6 +41,25 @@ all_snapshots = res.fetchall()
 full_prod = cursor.execute("SELECT prod_root FROM prod_dirs").fetchall()
 
 snapshot_row = cursor.execute("SELECT vm_name, vm_snap FROM fenix_maindb").fetchall()
+
+################################
+cursor = conn.cursor()
+
+res = cursor.execute("SELECT vm_name,  vm_snap, lang  FROM fenix_maindb").fetchall()
+
+for item in res:
+    # print(item)
+    vm, snap, lang = item
+    # print(vm, snap)
+    if vm in all_cfg_dct:
+        all_cfg_dct[vm]['snap'].append(snap)
+    else:
+        all_cfg_dct[vm] = {'snap': [snap], 'lang': lang}
+        # pprint.pprint(my_dict)
+
+for item in all_cfg_dct:
+    all_cfg_dct[item]['snap'] = sorted(all_cfg_dct[item]['snap'])
+
 
 conn.close()
 # ---- end DB ----
@@ -181,6 +201,12 @@ def makexls():
 def start_clear():
     # print(snapshot_dct)
     return jsonify(snapshot_dct)
+
+
+@app.route('/api/allcfg', methods=['GET'])
+def all_cfg():
+    # print(snapshot_dct)
+    return jsonify(all_cfg_dct)
 
 
 @app.route('/api/start_testset', methods=['GET'])
