@@ -30,6 +30,7 @@ snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
 db_path = r'c:\production_svelte\server\db.sqlite3'
 snapshot_dct = dict()
 all_cfg_dct = dict()
+prod_cfg_dct = dict()
 
 # ---- DB ----
 conn = sqlite3.connect(db_path)
@@ -60,9 +61,8 @@ for item in res:
 for item in all_cfg_dct:
     all_cfg_dct[item]['snap'] = sorted(all_cfg_dct[item]['snap'])
 
-
 conn.close()
-# ---- end DB ----
+################ ---- end DB ----
 
 for item in snapshot_row:
     vm, snap = item
