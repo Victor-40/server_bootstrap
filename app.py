@@ -25,8 +25,8 @@ root_nv = r'\\svr-rum-net-04\new_versions'
 root_host_test = r'D:\Testing\Test-1'
 root_guest_test = r'c:\Test'
 root_report = r'\\rum-cherezov-dt\!Reports'
-cfg_path = r'c:\production_svelte\server\cfg.json'
-snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
+# cfg_path = r'c:\production_svelte\server\cfg.json'
+# snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
 db_path = r'c:\production_svelte\server\db.sqlite3'
 snapshot_dct = dict()
 all_cfg_dct = dict()
@@ -36,27 +36,41 @@ prod_cfg_dct = dict()
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-res = cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix  FROM fenix_maindb WHERE production='1'")
-all_snapshots = res.fetchall()
+res = cursor.execute("SELECT vm_name, vm_path, vm_snap, lang, prod_prefix, production, cad FROM fenix_maindb")
+all_recs = res.fetchall()
 
+
+# res = cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix  FROM fenix_maindb WHERE production='1'")
+# all_snapshots = res.fetchall()
+cursor = conn.cursor()
 full_prod = cursor.execute("SELECT prod_root FROM prod_dirs").fetchall()
 
-snapshot_row = cursor.execute("SELECT vm_name, vm_snap FROM fenix_maindb").fetchall()
-
-################################
-cursor = conn.cursor()
-
-res = cursor.execute("SELECT vm_name,  vm_snap, lang  FROM fenix_maindb").fetchall()
-
-for item in res:
-    # print(item)
-    vm, snap, lang = item
-    # print(vm, snap)
+for vm, path, snap, lang, prefix, production, cad in all_recs:
+    # print(vm, path, snap, lang, prefix, production, cad)
     if vm in all_cfg_dct:
+
         all_cfg_dct[vm]['snap'].append(snap)
     else:
-        all_cfg_dct[vm] = {'snap': [snap], 'lang': lang}
-        # pprint.pprint(my_dict)
+        all_cfg_dct[vm] = {'path': path, 'lang': lang, 'snap': [snap]}
+
+
+
+
+
+################################
+# cursor = conn.cursor()
+#
+# res = cursor.execute("SELECT vm_name,  vm_snap, lang  FROM fenix_maindb").fetchall()
+
+# for item in res:
+#     # print(item)
+#     vm, snap, lang = item
+#     # print(vm, snap)
+#     if vm in all_cfg_dct:
+#         all_cfg_dct[vm]['snap'].append(snap)
+#     else:
+#         all_cfg_dct[vm] = {'snap': [snap], 'lang': lang}
+#         # pprint.pprint(my_dict)
 
 for item in all_cfg_dct:
     all_cfg_dct[item]['snap'] = sorted(all_cfg_dct[item]['snap'])
@@ -64,15 +78,15 @@ for item in all_cfg_dct:
 conn.close()
 ################ ---- end DB ----
 
-for item in snapshot_row:
-    vm, snap = item
-    if vm in snapshot_dct:
-        snapshot_dct[vm].append(snap)
-    else:
-        snapshot_dct[vm] = [snap]
-
-for key in snapshot_dct:
-    snapshot_dct[key] = sorted(snapshot_dct[key])
+# for item in snapshot_row:
+#     vm, snap = item
+#     if vm in snapshot_dct:
+#         snapshot_dct[vm].append(snap)
+#     else:
+#         snapshot_dct[vm] = [snap]
+#
+# for key in snapshot_dct:
+#     snapshot_dct[key] = sorted(snapshot_dct[key])
 
 
 host = vix.VixHost(service_provider=3)
@@ -109,10 +123,10 @@ def make_xls(setups):
 
     for _setup in setups:
         setup_prefix = os.path.basename(_setup).split('-')[0]
+#          vm_name, vm_path, vm_snap, lang, prod_prefix, production, cad
+        for vm_name, vm_path, vm_snap, _, prod_prefix, production, _ in all_recs:
 
-        for item in all_snapshots:
-            vm_name, vm_path, vm_snap, prod_prefix = item
-            if prod_prefix.startswith(setup_prefix):
+            if prod_prefix.startswith(setup_prefix) and production == "1":
                 result.append((_setup,  vm_name, vm_path,  vm_snap, "0"))
 
     job_file = r'd:\Testing\VMWare\VM-Monitor.Jobs.xls'
@@ -199,8 +213,8 @@ def makexls():
 
 @app.route('/api/startclear', methods=['GET'])
 def start_clear():
-    # print(snapshot_dct)
-    return jsonify(snapshot_dct)
+    # print(all_cfg_dct)
+    return jsonify(all_cfg_dct)
 
 
 @app.route('/api/allcfg', methods=['GET'])
