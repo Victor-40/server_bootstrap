@@ -25,8 +25,6 @@ root_nv = r'\\svr-rum-net-04\new_versions'
 root_host_test = r'D:\Testing\Test-1'
 root_guest_test = r'c:\Test'
 root_report = r'\\rum-cherezov-dt\!Reports'
-# cfg_path = r'c:\production_svelte\server\cfg.json'
-# snap_cfg_path = r'c:\production_svelte\server\snap_dct.json'
 db_path = r'c:\production_svelte\server\db.sqlite3'
 snapshot_dct = dict()
 all_cfg_dct = dict()
@@ -39,55 +37,20 @@ cursor = conn.cursor()
 res = cursor.execute("SELECT vm_name, vm_path, vm_snap, lang, prod_prefix, production, cad FROM fenix_maindb")
 all_recs = res.fetchall()
 
-
-# res = cursor.execute("SELECT vm_name, vm_path, vm_snap, prod_prefix  FROM fenix_maindb WHERE production='1'")
-# all_snapshots = res.fetchall()
 cursor = conn.cursor()
 full_prod = cursor.execute("SELECT prod_root FROM prod_dirs").fetchall()
 
 for vm, path, snap, lang, prefix, production, cad in all_recs:
-    # print(vm, path, snap, lang, prefix, production, cad)
     if vm in all_cfg_dct:
-
         all_cfg_dct[vm]['snap'].append(snap)
     else:
         all_cfg_dct[vm] = {'path': path, 'lang': lang, 'snap': [snap]}
-
-
-
-
-
-################################
-# cursor = conn.cursor()
-#
-# res = cursor.execute("SELECT vm_name,  vm_snap, lang  FROM fenix_maindb").fetchall()
-
-# for item in res:
-#     # print(item)
-#     vm, snap, lang = item
-#     # print(vm, snap)
-#     if vm in all_cfg_dct:
-#         all_cfg_dct[vm]['snap'].append(snap)
-#     else:
-#         all_cfg_dct[vm] = {'snap': [snap], 'lang': lang}
-#         # pprint.pprint(my_dict)
 
 for item in all_cfg_dct:
     all_cfg_dct[item]['snap'] = sorted(all_cfg_dct[item]['snap'])
 
 conn.close()
-################ ---- end DB ----
-
-# for item in snapshot_row:
-#     vm, snap = item
-#     if vm in snapshot_dct:
-#         snapshot_dct[vm].append(snap)
-#     else:
-#         snapshot_dct[vm] = [snap]
-#
-# for key in snapshot_dct:
-#     snapshot_dct[key] = sorted(snapshot_dct[key])
-
+# ---- end DB ----
 
 host = vix.VixHost(service_provider=3)
 
@@ -118,12 +81,9 @@ def find_builds(build, tag, _prod, subdir):
 def make_xls(setups):
     result = list()
 
-    # with open(snap_cfg_path) as fi:
-    #     vms = json.load(fi)
-
     for _setup in setups:
         setup_prefix = os.path.basename(_setup).split('-')[0]
-#          vm_name, vm_path, vm_snap, lang, prod_prefix, production, cad
+
         for vm_name, vm_path, vm_snap, _, prod_prefix, production, _ in all_recs:
 
             if prod_prefix.startswith(setup_prefix) and production == "1":
@@ -164,13 +124,9 @@ def ping_pong():
 @app.route('/api/cfg', methods=['GET'])
 def all_books():
     cfg = dict()
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    res = cursor.execute("SELECT vm_name, vm_path FROM fenix_maindb GROUP BY vm_name")
-    db_req = res.fetchall()
-    conn.close()
-    for vmname, vmpath in db_req:
-        cfg[vmname] = {'pth': vmpath}
+
+    for _vm in all_cfg_dct:
+        cfg[_vm] = {'pth': all_cfg_dct[_vm]['path']}
 
     for _vm in cfg:
         try:
@@ -184,14 +140,11 @@ def all_books():
         else:
             cfg[_vm]['status'] = 'free'
 
-    response_object = cfg
-    # print(cfg)
-    return jsonify(response_object)
+    return jsonify(cfg)
 
 
 @app.route('/api/findsetups', methods=['GET', 'POST'])
 def find_setups():
-    # response_object = []
     if request.method == 'POST':
         post_data = request.get_json()
         # print(post_data)
@@ -204,7 +157,6 @@ def find_setups():
 
 @app.route('/api/makexls', methods=['POST'])
 def makexls():
-    # response_object = []
     post_data = request.get_json()
     response_object = make_xls(post_data)
 
