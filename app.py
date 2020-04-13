@@ -163,10 +163,21 @@ def makexls():
     return jsonify(response_object)
 
 
-@app.route('/api/startclear', methods=['GET'])
+@app.route('/api/startclear', methods=['POST'])
 def start_clear():
-    # print(all_cfg_dct)
-    return jsonify(all_cfg_dct)
+    post_data = request.get_json()
+    print(post_data)
+
+    vm_name = post_data['vm']
+    vm_path = all_cfg_dct[vm_name]['path']
+    snapshot = post_data['snap']
+
+    vm = host.open_vm(vm_path)
+    work_snapshot = vm.snapshot_get_named(snapshot)
+    vm.snapshot_revert(work_snapshot)
+    vm.power_on(launch_gui=True)
+
+    return jsonify("vm %s was started" % vm_name)
 
 
 @app.route('/api/allcfg', methods=['GET'])
