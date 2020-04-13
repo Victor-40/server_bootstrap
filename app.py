@@ -126,14 +126,14 @@ def all_books():
     cfg = dict()
 
     for _vm in all_cfg_dct:
-        cfg[_vm] = {'pth': all_cfg_dct[_vm]['path']}
+        cfg[_vm] = {'path': all_cfg_dct[_vm]['path'], 'snap': all_cfg_dct[_vm]['snap']}
 
     for _vm in cfg:
         try:
-            vm = host.open_vm(cfg[_vm]['pth'])
+            vm = host.open_vm(cfg[_vm]['path'])
         except vix.VixError as e:
             print(e)
-            print(cfg[_vm]['pth'])
+            print(cfg[_vm]['path'])
             sys.exit(1)
         if vm.is_running:
             cfg[_vm]['status'] = 'busy'
