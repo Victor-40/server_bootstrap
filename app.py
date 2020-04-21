@@ -55,7 +55,7 @@ conn.close()
 host = vix.VixHost(service_provider=3)
 
 
-def find_builds(build, tag, _prod, subdir):
+def find_builds(build, tag, _prod, subdir, _vs2019):
 
     patt = re.compile(r'-%s(_x64)*__(git--)*%s$' % (build, tag), re.I)
 
@@ -65,6 +65,10 @@ def find_builds(build, tag, _prod, subdir):
             prefix, = j
             if prefix.startswith(i):
                 work_prod.append(prefix)
+
+    # vs2019 only
+    if _vs2019:
+        work_prod = ["vs2019_" + x for x in work_prod]
 
     search_dirs = [os.path.join(root_nv, item, subdir) for item in work_prod]
     setups = list()
@@ -148,7 +152,8 @@ def find_setups():
     if request.method == 'POST':
         post_data = request.get_json()
         # print(post_data)
-        response_object = find_builds(post_data['build'], post_data['tag'], post_data['products'], post_data['subdir'])
+        response_object = find_builds(post_data['build'], post_data['tag'], post_data['products'], post_data['subdir'],
+                                      post_data['vs2019'])
     else:
         response_object = ['get']
 
